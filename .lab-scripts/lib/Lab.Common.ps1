@@ -54,6 +54,30 @@ function Get-LabValue {
     return $Default
 }
 
+function Resolve-EnvironmentUrl {
+    param([Parameter(Mandatory)][string]$Name)
+
+    $url = Get-LabValue "${Name}EnvUrl"
+    if ($url) { return $url }
+
+    $domain = Get-LabValue "${Name}EnvDomain"
+    if (-not $domain -and $Name -eq 'test') {
+        $devDomain = Get-LabValue 'devEnvDomain'
+        if ($devDomain) { $domain = $devDomain -replace 'wm-dev-', 'wm-test-' }
+    }
+    if (-not $domain -and $Name -eq 'test') {
+        $rid = Get-LabValue 'randomIdentifier'
+        if ($rid) { $domain = "wm-test-$rid" }
+    }
+
+    if ($domain) {
+        $url = "https://$domain.crm4.dynamics.com"
+        Set-LabValue "${Name}EnvUrl" $url
+    }
+
+    return $url
+}
+
 # Seed the random identifier once; reused for all unique names in the shared tenant.
 function Initialize-RandomIdentifier {
     if (-not (Get-LabValue 'randomIdentifier')) {
