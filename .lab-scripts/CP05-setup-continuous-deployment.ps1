@@ -22,9 +22,10 @@ Write-Step "CP05 — Continuous Deployment (OIDC)"
 
 $rid     = Initialize-RandomIdentifier
 $repo    = Get-LabValue 'repo'
-$testUrl = Get-LabValue 'testEnvUrl'
+$testUrl = Resolve-EnvironmentUrl 'test'
 if (-not $repo) { $originUrl = git -C $LabRoot remote get-url origin 2>$null; if ($originUrl -match 'github\.com[:/](.+?)(?:\.git)?$') { $repo = $Matches[1] }; Set-LabValue 'repo' $repo }
 if (-not $testUrl) { Write-Err "Run CP04 first (Test environment URL missing)"; exit 1 }
+Write-Ok "Test environment: $testUrl"
 
 # Step 1: Verify Azure sign-in and tenant (done in CP01).
 $tenantId = Get-LabValue 'tenantId'
